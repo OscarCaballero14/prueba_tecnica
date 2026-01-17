@@ -1,5 +1,5 @@
-import { responseSuccess, responseError } from "../utils/response.js"
-import { update, getAllUsers, getUser, removeUser } from "../services/user.service.js"
+import { responseSuccess, responseError } from "../utils/response.js";
+import { update, getAllUsers, getUser, removeUser } from "../services/user.service.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -29,31 +29,31 @@ export const deleteUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-    try {
-        const { name, lastName, email, phone, address, password } = req.body;
+  try {
+    const { name, lastName, email, phone, address, password } = req.body;
 
-        if (!name || !lastName || !email || !phone || !address || !password) {
-            return responseError(res, "Todos los campos son obligatorios", 400);
-        }
-        
-        const user = await update(req.params.id, {
-            name,
-            lastName,
-            email,
-            phone,
-            address,
-            password
-        });
-
-        return responseSuccess(
-            res,
-            {
-                message: "El registro se ha actualizado correctamente",
-                user: user
-            },
-            201
-        );
-    } catch (error) {
-        return responseError(res, error.message, 400);
+    if (!name || !lastName || !email || !phone || !address || !password) {
+      return responseError(res, "Todos los campos son obligatorios", 400);
     }
+    
+    const user = await update(req.params.id, {
+      name,
+      lastName,
+      email,
+      phone,
+      address,
+      password
+    });
+
+    return responseSuccess(
+      res,
+      {
+        message: "El registro se ha actualizado correctamente",
+        user: user
+      },
+      201
+    );
+  } catch (error) {
+    return responseError(res, error.message, 400);
+  }
 }

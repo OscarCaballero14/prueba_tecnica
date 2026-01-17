@@ -1,10 +1,10 @@
 import User from "../models/users.js";
 
 export const updateUser = async (id, userData) => {
-    return await User.findByIdAndUpdate(id, userData, {
-        new: true,
-        runValidators: true
-    });
+  return await User.findByIdAndUpdate(id, userData, {
+    new: true,
+    runValidators: true
+  });
 }
 
 export const findUserByEmail = async (email) => {
