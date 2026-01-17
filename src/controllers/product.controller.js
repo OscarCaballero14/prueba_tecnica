@@ -3,6 +3,8 @@ import {
     getAllProducts, getProduct, removeProduct,
     update, create, deactivate
 } from "../services/product.service.js";
+import { CreateProductDTO } from "../dto/product/createProduct.dto.js";
+import { UpdateProductDTO } from "../dto/product/updateProduct.dto.js";
 
 export const getProducts = async (req, res) => {
   try {
@@ -33,20 +35,9 @@ export const deleteProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const { name, description, price, currency, stock, category } = req.body;
-
-    if (!name || !description || !price || !currency || !stock || !category) {
-        return responseError(res, "Todos los campos son obligatorios", 400);
-    }
+    const createProductDTO = new UpdateProductDTO(req.body);
     
-    const product = await update(req.params.id, {
-        name,
-        description,
-        price,
-        currency,
-        stock,
-        category
-    });
+    const product = await update(req.params.id, createProductDTO);
 
     return responseSuccess(
       res,
@@ -63,20 +54,9 @@ export const updateProduct = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try{
-    const { name, description, price, currency, stock, category } = req.body;
+    const createProductDTO = new CreateProductDTO(req.body);
 
-    if (!name || !description || !price || !currency || !stock || !category) {
-      return responseError(res, "Todos los campos son obligatorios", 400);
-    }
-
-    const product = await create({
-        name,
-        description,
-        price,
-        currency,
-        stock,
-        category
-    });
+    const product = await create(createProductDTO);
 
     return responseSuccess(
       res,

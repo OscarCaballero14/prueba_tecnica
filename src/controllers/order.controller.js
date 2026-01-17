@@ -1,12 +1,15 @@
 import { createPurchaseOrder, getOrdersByUser, getAllOrders, getOrderById } from "../services/order.service.js";
 import { responseSuccess, responseError } from "../utils/response.js";
+import { CreateOrderDTO } from "../dto/order/createOrder.dto.js"
 
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
     const { items } = req.body;
 
-    const order = await createPurchaseOrder(userId, items);
+    const createOrderDTO = new CreateOrderDTO({userId, items});
+
+    const order = await createPurchaseOrder(createOrderDTO);
 
     return responseSuccess(
       res,

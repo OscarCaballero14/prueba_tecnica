@@ -2,6 +2,7 @@ import {
     updateUser, findUserByEmail, findUserByPhoneNumber, findUserById,
     findAllUsers, deleteUserById
 } from "../repositories/user.repository.js";
+import { UserResponseDTO } from "../dto/user/userResponse.dto.js"
 
 export const update = async (id, userData) => {
     const user = await findUserById(id);
@@ -25,19 +26,16 @@ export const update = async (id, userData) => {
         }
     }
 
-    const result = updateUser(id, userData);
+    const result = updateUser(id, userData, { new: true });
 
-    result.password = undefined;
-
-    return result;
+    return new UserResponseDTO(result);
 }
 
 export const getAllUsers = async () => {
     const users = await findAllUsers();
 
     return users.map(user => {
-        user.password = undefined;
-        return user;
+        return new UserResponseDTO(user);
     });
 };
 
@@ -48,8 +46,7 @@ export const getUser = async (userId) => {
         throw new Error("Usuario no encontrado");
     }
 
-    user.password = undefined;
-    return user;
+    return new UserResponseDTO(user);
 };
 
 export const removeUser = async (userId) => {

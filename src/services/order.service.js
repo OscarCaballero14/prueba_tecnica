@@ -1,7 +1,10 @@
 import { createOrder, findOrdersByUser, findAllProducts, findOrderById } from "../repositories/order.repository.js";
 import { findProductById } from "../repositories/product.repository.js";
+import { OrderResponseDTO } from "../dto/order/orderResponse.dto.js";
 
-export const createPurchaseOrder = async (userId, items) => {
+export const createPurchaseOrder = async (dataOrden) => {
+  const { userId, items } = dataOrden;
+
   if (!items || items.length === 0) {
     throw new Error("La orden debe tener al menos un producto");
   }
@@ -43,17 +46,30 @@ export const createPurchaseOrder = async (userId, items) => {
     status: "CREATED"
   });
 
-  return order;
+  return new OrderResponseDTO(order);
 };
 
 export const getOrdersByUser = async (userId) => {
-  return await findOrdersByUser(userId);
+  const orders = await findOrdersByUser(userId);
+
+  return orders.map(order => {
+    return new OrderResponseDTO(order);
+  });
 };
 
 export const getAllOrders = async () => {
-  return await findAllProducts();
+  const orders = await findAllProducts();
+
+  return orders.map(order => {
+    return new OrderResponseDTO(order);
+  });
 };
 
 export const getOrderById = async (id) => {
-  return await findOrderById(id);
+  const order = await findOrderById(id);
+  
+  if (!order) {
+    throw new Error("Orden no encontrada");
+  }
+  return new OrderResponseDTO(order);
 };

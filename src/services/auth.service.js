@@ -2,9 +2,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { createUser, findUserByEmail, findUserByPhoneNumber } from "../repositories/auth.repository.js";
 import { JWT_SECRET } from "../config/config.js"
+import { UserResponseDTO } from "../dto/user/userResponse.dto.js";
 
 export const registerUser = async (userData) => {
-  const { email, phone, password } = userData;
+  const { email, phone, password, role } = userData;
 
   const userExists = await findUserByEmail(email);
   if (userExists) {
@@ -20,12 +21,11 @@ export const registerUser = async (userData) => {
 
   const user = await createUser({
     ...userData,
-    password: hashedPassword
+    password: hashedPassword,
+    role: role.toLowerCase()
   });
 
-  user.password = undefined;
-
-  return user;
+  return new UserResponseDTO(user);
 };
 
 const hashPassword = async (password) => {

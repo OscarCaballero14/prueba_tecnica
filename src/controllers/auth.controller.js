@@ -1,23 +1,12 @@
 import { responseSuccess, responseError } from "../utils/response.js"
 import { registerUser, loginUser } from "../services/auth.service.js"
+import { CreateUserDTO } from "../dto/user/createUser.dto.js"
 
 export const register = async (req, res) => {
   try{
-    const { name, lastName, email, phone, address, password, role } = req.body;
+    const createUserDTO = new CreateUserDTO(req.body);
 
-    if (!name || !lastName || !email || !phone || !address || !password || !role) {
-      return responseError(res, "Todos los campos son obligatorios", 400);
-    }
-
-    const user = await registerUser({
-      name,
-      lastName,
-      email,
-      phone,
-      address,
-      password,
-      role
-    });
+    const user = await registerUser(createUserDTO);
 
     return responseSuccess(
       res,

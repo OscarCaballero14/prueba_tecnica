@@ -1,5 +1,6 @@
 import { responseSuccess, responseError } from "../utils/response.js";
 import { update, getAllUsers, getUser, removeUser } from "../services/user.service.js";
+import { UpdateUserDTO } from "../dto/user/updateUser.dto.js"
 
 export const getUsers = async (req, res) => {
   try {
@@ -30,20 +31,9 @@ export const deleteUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { name, lastName, email, phone, address, password } = req.body;
-
-    if (!name || !lastName || !email || !phone || !address || !password) {
-      return responseError(res, "Todos los campos son obligatorios", 400);
-    }
+    const updateUserDTO = new UpdateUserDTO(req.body);
     
-    const user = await update(req.params.id, {
-      name,
-      lastName,
-      email,
-      phone,
-      address,
-      password
-    });
+    const user = await update(req.params.id, updateUserDTO);
 
     return responseSuccess(
       res,

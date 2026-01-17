@@ -3,11 +3,14 @@ import {
     updateProduct, findProductById, findProductByName,
     deactivateProduct
 } from "../repositories/product.repository.js";
+import { ProductResponseDTO } from "../dto/product/productResponse.dto.js";
 
 export const getAllProducts = async () => {
     const products = await findAllProducts();
 
-    return products;
+    return products.map(product => {
+        return new ProductResponseDTO(product);
+    });
 };
 
 export const getProduct = async (prodId) => {
@@ -17,7 +20,7 @@ export const getProduct = async (prodId) => {
         throw new Error("Producto no encontrado");
     }
 
-    return product;
+    return new ProductResponseDTO(product);
 };
 
 export const removeProduct = async (prodId) => {
@@ -45,7 +48,7 @@ export const update = async (id, prodData) => {
 
     const result = updateProduct(id, prodData);
 
-    return result;
+    return new ProductResponseDTO(result);
 }
 
 export const create = async (prodData) => {
@@ -58,7 +61,7 @@ export const create = async (prodData) => {
 
     const result = await createProduct(prodData);
 
-    return result;
+    return new ProductResponseDTO(result);
 }
 
 export const deactivate = async (id) => {
@@ -69,5 +72,5 @@ export const deactivate = async (id) => {
 
     const result = await deactivateProduct(id);
 
-    return result;
+    return new ProductResponseDTO(result);
 }

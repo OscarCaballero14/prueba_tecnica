@@ -6,7 +6,7 @@ export const createOrder = async (data) => {
 
 export const findOrderById = async (id) => {
   return await Order.findById(id)
-    .populate("user", "name email")
+    .populate("user", "name lastName email")
     .populate("items.product", "name");
 };
 
