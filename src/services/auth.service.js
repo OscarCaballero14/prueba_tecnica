@@ -1,7 +1,10 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { createUser, findUserByEmail, findUserByPhoneNumber } from "../repositories/auth.repository.js";
+import { JWT_SECRET } from "../config/config.js"
 
 export const registerUser = async (userData) => {
-  const { email, phone } = userData;
+  const { email, phone, password } = userData;
 
   const userExists = await findUserByEmail(email);
   if (userExists) {
@@ -13,9 +16,48 @@ export const registerUser = async (userData) => {
     throw new Error("El numero de teléfono ya está registrado");
   }
 
-  const user = await createUser(userData);
+  const hashedPassword = await hashPassword(password);
+
+  const user = await createUser({
+    ...userData,
+    password: hashedPassword
+  });
 
   user.password = undefined;
 
   return user;
+};
+
+const hashPassword = async (password) => {
+  const saltRounds = 10;
+  return await bcrypt.hash(password, saltRounds);
+};
+
+export const loginUser = async ({ email, password }) => {
+  const user = await findUserByEmail(email);
+  if (!user) {
+    throw new Error("Credenciales inválidas");
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new Error("Credenciales inválidas");
+  }
+
+  const credentials = {
+    id: user._id,
+    email: user.email,
+    role: user.role
+  };
+
+  const token = jwt.sign(credentials, JWT_SECRET, {
+    expiresIn: "1d"
+  });
+
+  user.password = undefined;
+
+  return {
+    user,
+    token
+  };
 };
