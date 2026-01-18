@@ -12,8 +12,6 @@ Variables de entorno. Crear un archivo .env en la raíz del proyecto:
 PORT = 5000
 JWT_SECRET = PHVQQ2pJw2rbBIxvS4bExOtl0LggtPpi
 MONGODB_URI = mongodb://localhost:27017/prueba
-
-# Email (Ethereal - sandbox)
 WEBHOOK_SECRET = 6ZMJKEUVsgPwKasa4bL4SPEUVkI$aGg*
 
 # Email (Ethereal - sandbox)
