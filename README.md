@@ -21,6 +21,7 @@ MAIL_PASS = Wq1FrsjaRcqcGJbxdq
 
 
 Ejecutar el proyecto localmente
+
 1️⃣ Instalar dependencias
 -npm install
 
