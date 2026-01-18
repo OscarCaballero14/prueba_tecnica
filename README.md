@@ -562,3 +562,25 @@ Este endpoint es solo para desarrollo
 En un entorno real, el webhook sería llamado por el gateway externo
 La firma del webhook evita ejecuciones no autorizadas
 El sistema es idempotente ante eventos duplicados
+
+================================================
+
+📧 Configuración y simulación de envío de correos
+Para el envío de correos de confirmación de pago, el proyecto utiliza Nodemailer en modo sandbox (Ethereal Email), lo que permite simular el envío de correos sin necesidad de un proveedor real.
+
+Pasos para configurar el correo
+-Ejecutar el script de generación de credenciales de correo: node scripts/generateMailAccount.js
+
+Al ejecutar el script, en la consola se mostrarán:
+-El correo generado (MAIL_USER)
+-La contraseña (MAIL_PASS)
+-Un enlace de previsualización del correo enviado (simulación)
+-Copiar los valores de MAIL_USER y MAIL_PASS mostrados en consola y agregarlos al archivo .env:
+MAIL_USER=usuario_generado@ethereal.email
+MAIL_PASS=contraseña_generada
+-Reiniciar el servidor para que las variables de entorno sean cargadas correctamente.
+
+Visualización del correo
+-Cada vez que se confirme un pago exitoso:
+-El sistema enviará un correo de confirmación al usuario
+-En la consola del servidor se imprimirá un link de previsualización, el cual permite ver el contenido del correo en el navegador sin enviarlo realmente
