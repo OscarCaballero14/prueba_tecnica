@@ -481,7 +481,6 @@ Pago no encontrado
 }
 
 ℹ️ Notas importantes
-
 El webhook debe enviarse con el body sin modificar (raw body)
 El mismo evento no debe procesarse más de una vez
 El flujo de negocio no depende del frontend
@@ -491,3 +490,75 @@ El sistema es tolerante a reintentos del gateway
 ======================================================
 
 
+🧪 Simulación de gateway de pagos (Mock)
+
+Para efectos de desarrollo y pruebas, el proyecto incluye un gateway de pagos simulado que permite confirmar o rechazar pagos sin depender de un proveedor externo real.
+
+Este gateway se encarga de:
+Generar un evento de pago
+Firmar el payload con un secreto compartido
+Disparar el webhook interno del sistema
+
+▶️ Simular pago
+
+Endpoint = POST /mock/pay
+
+Descripción
+Simula la respuesta de un proveedor de pagos enviando un evento firmado al endpoint /payments/webhook.
+
+📥 Request body (JSON)
+{
+  "transactionId": "3b3d181f-1463-423a-9631-955e65dce477",
+  "status": "PAID"
+}
+
+Campos
+transactionId: ID de la transacción generado al iniciar el pago
+status: PAID → simula pago exitoso
+cualquier otro valor → simula pago fallido
+
+⚙️ Lógica de simulación
+Se genera un eventId único
+Se normaliza el estado del pago:
+PAID → SUCCEEDED
+otro → FAILED
+Se construye el evento de pago
+Se firma el payload usando HMAC SHA-256
+Se envía automáticamente el evento al endpoint: POST /payments/webhook
+
+📤 Response (200 OK)
+{
+  "error": false,
+  "status": 200,
+  "body": {
+    "message": "Pago simulado",
+    "event": {
+      "eventId": "8e8c9b28-5c91-4a34-8f5f-9e5a1d9c8c2a",
+      "transactionId": "3b3d181f-1463-423a-9631-955e65dce477",
+      "status": "SUCCEEDED"
+    }
+  }
+}
+
+🔄 Resultado esperado en el sistema
+Estado simulado	Estado del pago	Estado de la orden
+PAID	SUCCEEDED	PAID
+FAILED	FAILED	FAILED
+
+📝 Flujo completo de prueba
+
+Crear productos
+Crear una orden (POST /orders)
+Iniciar el pago (POST /payments/init)
+Copiar el transactionId
+Simular el pago (POST /mock/pay)
+
+Verificar:
+Orden actualizada
+Pago confirmado o rechazado
+
+⚠️ Notas importantes
+Este endpoint es solo para desarrollo
+En un entorno real, el webhook sería llamado por el gateway externo
+La firma del webhook evita ejecuciones no autorizadas
+El sistema es idempotente ante eventos duplicados
