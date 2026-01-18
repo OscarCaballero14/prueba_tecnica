@@ -1,4 +1,4 @@
-PRUEBA TÉCNICA – BACKEND DEVELOPER SENIOR (Node.js / NestJS o Express + AWS + MongoDB)
+#PRUEBA TÉCNICA – BACKEND DEVELOPER SENIOR (Node.js / NestJS o Express + AWS + MongoDB)
 
 Backend desarrollado con Node.js, Express y MongoDB, que implementa:
 -Gestión de usuarios, productos y órdenes
