@@ -14,7 +14,7 @@ JWT_SECRET = PHVQQ2pJw2rbBIxvS4bExOtl0LggtPpi
 MONGODB_URI = mongodb://localhost:27017/prueba
 WEBHOOK_SECRET = 6ZMJKEUVsgPwKasa4bL4SPEUVkI$aGg*
 
-# Email (Ethereal - sandbox)
+Email (Ethereal - sandbox)
 MAIL_USER = okku2au64nym2sm4@ethereal.email
 MAIL_PASS = Wq1FrsjaRcqcGJbxdq
 -Para MAIL_USER y MAIL_PASS se usa Ethereal Email (sandbox). Los correos no se envían a usuarios reales.
