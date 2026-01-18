@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import Payment from "../models/payment.js";
 import Order from "../models/orders.js";
+import { sendPaymentConfirmationEmail } from "../services/email.service.js";
 
 export const createPaymentIntent = async (dto) => {
   const order = await Order.findById(dto.orderId);
@@ -29,4 +30,14 @@ export const createPaymentIntent = async (dto) => {
     amount: payment.amount,
     status: payment.status
   };
+};
+
+export const handlePaidPayment = async (order, payment, user) => {
+  try {
+    await sendPaymentConfirmationEmail(user, order);
+    order.emailSent = true;
+    await order.save();
+  } catch (err) {
+    console.error("Error enviando email:", err.message);
+  }
 };

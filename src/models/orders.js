@@ -57,10 +57,12 @@ const OrderSchema = new mongoose.Schema(
         "CREATED",
         "PAYMENT_PENDING",
         "PAID",
-        "FAILED",
-        "CANCELED"
+        "FAILED"
       ],
       default: "CREATED"
+    },
+    emailSent: { 
+      type: Boolean, default: false
     }
   },
   {

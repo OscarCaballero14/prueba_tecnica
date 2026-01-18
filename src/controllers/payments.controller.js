@@ -1,8 +1,9 @@
 import { responseSuccess, responseError } from "../utils/response.js";
 import Payment from "../models/payment.js";
 import Order from "../models/orders.js";
+import User from "../models/users.js";
 import WebhookEvent from "../models/webhook.js";
-import { createPaymentIntent } from "../services/payments.service.js";
+import { createPaymentIntent, handlePaidPayment } from "../services/payments.service.js";
 import { CreatePaymentDTO } from "../dto/payment/createPayment.js";
 
 export const paymentWebhook = async (req, res) => {
@@ -20,10 +21,12 @@ export const paymentWebhook = async (req, res) => {
     }
 
     const order = await Order.findById(payment.order);
+    const user = await User.findById(order.user);
 
     if (status === "SUCCEEDED") {
       payment.status = "SUCCEEDED";
       order.status = "PAID";
+      await handlePaidPayment(order, payment, user);
     } else {
       payment.status = "FAILED";
       order.status = "FAILED";
@@ -52,7 +55,7 @@ export const initPayment = async (req, res) => {
     return responseSuccess(
       res,
       {
-        message: "Payment intent creado",
+        message: "Proceso de pago iniciado",
         payment
       },
       201

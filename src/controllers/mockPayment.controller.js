@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { WEBHOOK_SECRET } from "../config/config.js";
+import { responseSuccess, responseError } from "../utils/response.js"
 
 const URL = "http://localhost:5000";
 
@@ -7,10 +8,8 @@ export const simulatePayment = async (req, res) => {
   try {
     const { transactionId, status } = req.body;
 
-    console.log(transactionId, status);
-
     if (!transactionId) {
-      return res.status(400).send("transactionId requerido");
+      return responseError(res, "transactionId requerido", 400);
     }
 
     const paymentStatus = status == "PAID" ? "SUCCEEDED" : "FAILED";
@@ -38,11 +37,15 @@ export const simulatePayment = async (req, res) => {
       body: payload
     });
 
-    return res.status(200).json({
-      message: "Pago simulado",
-      event
-    });
+    return responseSuccess(
+      res, 
+      {
+        message: "Pago simulado",
+        event
+      }, 
+      200
+    )
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return responseError(res, error.message, 400);
   }
 };
