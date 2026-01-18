@@ -329,3 +329,165 @@ Otros Endpoints:
 router.get("/orders/user/:id", authenticate, authorize(["user", "admin"]), OrdersByUser);
 router.get("/orders", authenticate, authorize(["admin"]), allOrders);
 router.get("/orders/:id", authenticate, authorize(["admin"]), oneOrder);
+
+=======================================================
+
+💳 Pagos
+
+El sistema incluye un flujo de pago simulado (mock/sandbox).
+El pago se inicia a partir de una orden previamente creada y genera un transactionId que luego será utilizado por el gateway simulado para confirmar o rechazar el pago mediante un webhook.
+
+▶️ Iniciar pago de una orden
+
+Endpoint = POST /payments/init
+
+Autorización
+
+Requiere token JWT válido
+Rol permitido: USER
+
+📥 Request body (JSON)
+{
+  "orderId": "696c4b9e12a2a5c7570829b8"
+}
+
+Reglas y validaciones
+
+La orden debe existir
+La orden debe estar en estado: CREATED
+Si la orden ya fue pagada o está en otro estado, el pago no puede iniciarse
+
+⚙️ Lógica de negocio aplicada
+Se valida la existencia de la orden
+Se valida que la orden esté en estado CREATED
+Se genera un transactionId único (simulación de gateway)
+Se crea un registro de pago con estado inicial PENDING
+
+La orden cambia automáticamente a estado: PAYMENT_PENDING
+
+📤 Response (201 Created)
+{
+  "error": false,
+  "status": 201,
+  "body": {
+    "message": "Proceso de pago iniciado",
+    "payment": {
+      "transactionId": "3b3d181f-1463-423a-9631-955e65dce477",
+      "amount": 24000,
+      "status": "PENDING"
+    }
+  }
+}
+
+❌ Errores comunes
+
+Orden no encontrada
+{
+  "error": true,
+  "message": "Orden no encontrada"
+}
+
+Orden en estado inválido
+{
+  "error": true,
+  "message": "La orden no puede pagarse en este estado"
+}
+
+==========================================================
+
+🔔 Webhook de pagos
+
+El endpoint de webhook simula la notificación enviada por un gateway de pagos externo para confirmar o rechazar una transacción.
+Este endpoint NO es llamado por el frontend, sino por el proveedor de pagos (en este caso, un gateway simulado).
+
+📡 Endpoint webhook
+POST /payments/webhook
+
+Autenticación
+
+No usa JWT
+Protegido mediante firma HMAC (x-webhook-signature)
+
+📥 Request body (JSON)
+{
+  "eventId": "evt_001",
+  "transactionId": "3b3d181f-1463-423a-9631-955e65dce477",
+  "status": "SUCCEEDED"
+}
+
+Campos
+eventId: identificador único del evento (usado para idempotencia)
+transactionId: identificador de la transacción generada al iniciar el pago
+status: resultado del pago
+
+SUCCEEDED
+FAILED
+
+🔐 Validación de firma del webhook
+El backend valida que la petición provenga de una fuente confiable usando una firma HMAC SHA-256.
+Header requerido
+x-webhook-signature: <hash>
+La firma se genera a partir del payload crudo (rawBody) y una clave secreta compartida (WEBHOOK_SECRET).
+
+⚙️ Lógica de negocio aplicada
+Se valida la firma del webhook
+Se verifica idempotencia:
+Un mismo eventId no puede procesarse dos veces
+Se busca el pago por transactionId
+Se obtiene la orden y el usuario asociado
+
+Según el estado recibido:
+
+SUCCEEDED
+
+El pago pasa a SUCCEEDED
+La orden pasa a PAID
+Se ejecuta la lógica post-pago (handlePaidPayment)
+
+FAILED
+
+El pago pasa a FAILED
+La orden pasa a FAILED
+Se guarda el evento procesado para evitar duplicados
+
+📤 Response (200 OK)
+
+Webhook procesado correctamente
+{
+  "error": false,
+  "status": 200,
+  "body": "Webhook procesado"
+}
+
+Evento duplicado (idempotencia)
+{
+  "error": false,
+  "status": 200,
+  "body": "Evento ya procesado"
+}
+
+❌ Errores comunes
+
+Firma faltante
+401 Firma faltante
+
+Firma inválida
+401 Firma inválida
+
+Pago no encontrado
+{
+  "error": true,
+  "message": "Pago no encontrado"
+}
+
+ℹ️ Notas importantes
+
+El webhook debe enviarse con el body sin modificar (raw body)
+El mismo evento no debe procesarse más de una vez
+El flujo de negocio no depende del frontend
+El sistema es tolerante a reintentos del gateway
+
+
+======================================================
+
+
