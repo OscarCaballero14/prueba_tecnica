@@ -226,3 +226,107 @@ router.patch('/products/:id/deactivate', authenticate, authorize(["admin"]), dea
 
 =====================================================
 
+🧾 Órdenes de compra
+
+El sistema permite a los usuarios autenticados crear órdenes de compra a partir de los productos disponibles.
+Cada orden calcula automáticamente el subtotal, total y se crea con estado inicial CREATED.
+
+➕ Crear orden (USER)
+
+Endpoint = POST /orders
+
+Autorización
+
+Requiere token JWT válido
+Rol requerido: USER
+
+📥 Request body (JSON)
+{
+  "items": [
+    {
+      "productId": "696b173b379d27dc293e8fce",
+      "quantity": 3
+    },
+    {
+      "productId": "696be3e126c75d222590b300",
+      "quantity": 3
+    }
+  ]
+}
+
+Reglas y validaciones
+items debe ser un arreglo no vacío
+Cada item debe contener:
+productId
+quantity (mayor a 0)
+
+El producto debe:
+Existir
+Estar activo (isActive = true)
+Tener stock suficiente
+El userId se obtiene automáticamente desde el token JWT
+El subtotal y total se calculan automáticamente en el backend
+
+⚙️ Lógica de negocio aplicada
+Se valida disponibilidad y stock de cada producto
+Se calcula el subtotal por producto (price * quantity)
+Se calcula el subtotal general y total de la orden
+La orden se crea con estado inicial:
+
+CREATED
+
+📤 Response (201 Created)
+{
+  "error": false,
+  "status": 201,
+  "body": {
+    "message": "Orden creada correctamente",
+    "order": {
+      "id": "696c4b9e12a2a5c7570829b8",
+      "userId": "696ad158100189fdbf3ef5eb",
+      "status": "CREATED",
+      "items": [
+        {
+          "productId": "696b173b379d27dc293e8fce",
+          "name": "coca-cola",
+          "quantity": 3,
+          "subtotal": 15000
+        },
+        {
+          "productId": "696be3e126c75d222590b300",
+          "name": "PONQUÉ RAMO",
+          "quantity": 3,
+          "subtotal": 9000
+        }
+      ],
+      "subtotal": 24000,
+      "total": 24000,
+      "createdAt": "2026-01-18T02:55:26.019Z"
+    }
+  }
+}
+
+❌ Errores comunes
+
+Orden sin productos
+{
+  "error": true,
+  "message": "La orden debe tener al menos un producto"
+}
+
+Producto no disponible
+{
+  "error": true,
+  "message": "Producto no disponible"
+}
+
+Stock insuficiente
+{
+  "error": true,
+  "message": "Stock insuficiente para coca-cola"
+}
+
+Otros Endpoints:
+router.get("/orders/user/:id", authenticate, authorize(["user", "admin"]), OrdersByUser);
+router.get("/orders", authenticate, authorize(["admin"]), allOrders);
+router.get("/orders/:id", authenticate, authorize(["admin"]), oneOrder);
