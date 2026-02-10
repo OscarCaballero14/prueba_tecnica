@@ -1,10 +1,12 @@
 import crypto from "crypto";
-import Payment from "../models/payment.js";
-import Order from "../models/orders.js";
 import { sendPaymentConfirmationEmail } from "../services/email.service.js";
+import { 
+  findAllInforOrderById, updateOrderStatus, markEmailAsSent 
+} from "../repositories/order.repository.js";
+import { createPayment } from "../repositories/payments.repository.js";
 
 export const createPaymentIntent = async (dto) => {
-  const order = await Order.findById(dto.orderId);
+  const order = await findAllInforOrderById(dto.orderId);
 
   if (!order) {
     throw new Error("Orden no encontrada");
@@ -16,14 +18,13 @@ export const createPaymentIntent = async (dto) => {
 
   const transactionId = crypto.randomUUID();
 
-  const payment = await Payment.create({
+  const payment = await createPayment({
     order: order._id,
     transactionId,
     amount: order.total
   });
 
-  order.status = "PAYMENT_PENDING";
-  await order.save();
+  await updateOrderStatus(order, "PAYMENT_PENDING");
 
   return {
     transactionId,
@@ -35,8 +36,7 @@ export const createPaymentIntent = async (dto) => {
 export const handlePaidPayment = async (order, payment, user) => {
   try {
     await sendPaymentConfirmationEmail(user, order);
-    order.emailSent = true;
-    await order.save();
+    await markEmailAsSent(order);
   } catch (err) {
     console.error("Error enviando email:", err.message);
   }
